@@ -7,11 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "../hooks/useAuth";
 
-const Login = () => {
+const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const { login, loading } = useAuth();
+  const { adminLogin, loading } = useAuth();
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -24,8 +24,6 @@ const Login = () => {
     
     if (!password) {
       newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
     }
     
     setErrors(newErrors);
@@ -37,9 +35,9 @@ const Login = () => {
     
     if (validateForm()) {
       try {
-        await login(email, password);
+        await adminLogin(email, password);
       } catch (error) {
-        console.error("Login error:", error);
+        console.error("Admin login error:", error);
       }
     }
   };
@@ -48,17 +46,18 @@ const Login = () => {
     <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold text-health-secondary">W.O.M.B</CardTitle>
-          <CardDescription>Wellness Optimal Mind Body</CardDescription>
+          <CardTitle className="text-2xl font-bold text-health-secondary">Admin Login</CardTitle>
+          <CardDescription>W.O.M.B - Wellness Optimal Mind Body</CardDescription>
+          <CardDescription className="text-xs text-amber-600">For administrative access only</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Admin Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder="admin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={errors.email ? "border-red-500" : ""}
@@ -66,12 +65,7 @@ const Login = () => {
               {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-sm text-health-primary hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -92,28 +86,19 @@ const Login = () => {
                   Logging in...
                 </div>
               ) : (
-                'Sign In'
+                'Admin Login'
               )}
             </Button>
-
-            <div className="text-center mt-2">
-              <Link to="/admin-login" className="text-sm text-health-primary hover:underline">
-                Login as Admin
-              </Link>
-            </div>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col">
-          <div className="text-sm text-center text-gray-500">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-health-primary hover:underline">
-              Sign up
-            </Link>
-          </div>
+        <CardFooter className="flex justify-center">
+          <Link to="/login" className="text-sm text-health-primary hover:underline">
+            Back to User Login
+          </Link>
         </CardFooter>
       </Card>
     </div>
   );
 };
 
-export default Login;
+export default AdminLogin;
