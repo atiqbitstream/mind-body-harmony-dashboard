@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import { Card, CardContent } from "@/components/ui/card";
 
 const About = () => {
   const [aboutData, setAboutData] = useState({
@@ -49,7 +50,22 @@ Founded in 2020, our team of medical professionals and technology experts has de
           <p className="text-xl text-foreground/80">{aboutData.subtitle}</p>
         </header>
 
-        <div className="max-w-3xl mx-auto space-y-12">
+        <div className="max-w-4xl mx-auto space-y-12">
+          {/* Hero image section */}
+          <div className="relative h-80 rounded-2xl overflow-hidden shadow-lg">
+            <img 
+              src="/placeholder.svg" 
+              alt="WOMB Healthcare Technology" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+              <div className="p-6 text-white">
+                <h2 className="text-2xl font-bold">Transforming Healthcare</h2>
+                <p className="text-white/90">Through innovative technology and expert care</p>
+              </div>
+            </div>
+          </div>
+
           <section>
             <h2 className="text-2xl font-semibold text-health-primary mb-4">{aboutData.mainHeading}</h2>
             <div className="prose max-w-none text-foreground/80">
@@ -57,11 +73,22 @@ Founded in 2020, our team of medical professionals and technology experts has de
             </div>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-semibold text-health-primary mb-4">{aboutData.visionHeading}</h2>
-            <div className="prose max-w-none text-foreground/80">
-              <p>{aboutData.visionContent}</p>
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h2 className="text-2xl font-semibold text-health-primary mb-4">{aboutData.visionHeading}</h2>
+              <div className="prose max-w-none text-foreground/80">
+                <p>{aboutData.visionContent}</p>
+              </div>
             </div>
+            <Card className="overflow-hidden h-full">
+              <CardContent className="p-0">
+                <img 
+                  src="/placeholder.svg" 
+                  alt="Our vision for healthcare" 
+                  className="w-full h-64 object-cover"
+                />
+              </CardContent>
+            </Card>
           </section>
 
           <section>
