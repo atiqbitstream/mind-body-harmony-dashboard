@@ -4,10 +4,29 @@ import Navbar from "@/components/Navbar";
 import DeviceCard from "@/components/DeviceCard";
 import DataForm from "@/components/DataForm";
 import HistoryModal from "@/components/HistoryModal";
-import { Volume2, Lightbulb, CloudFog, Award, Thermometer, Waves, Heart, Brain } from "lucide-react";
+import DataHistoryModal from "@/components/DataHistoryModal";
+import { 
+  Volume2, 
+  Lightbulb, 
+  CloudFog, 
+  Award, 
+  Thermometer, 
+  Waves, 
+  Heart, 
+  Brain, 
+  Activity,
+  Flame
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Dashboard = () => {
   const [modalData, setModalData] = useState({ isOpen: false, title: "", endpoint: "" });
+  const [dataHistoryModal, setDataHistoryModal] = useState({ 
+    isOpen: false, 
+    title: "", 
+    endpoint: "", 
+    fields: [] as {name: string, label: string}[] 
+  });
 
   const handleViewHistory = (title: string, endpoint: string) => {
     setModalData({
@@ -17,8 +36,21 @@ const Dashboard = () => {
     });
   };
 
+  const handleViewDataHistory = (title: string, endpoint: string, fields: {name: string, label: string}[]) => {
+    setDataHistoryModal({
+      isOpen: true,
+      title,
+      endpoint,
+      fields
+    });
+  };
+
   const closeModal = () => {
     setModalData({ isOpen: false, title: "", endpoint: "" });
+  };
+
+  const closeDataHistoryModal = () => {
+    setDataHistoryModal({ isOpen: false, title: "", endpoint: "", fields: [] });
   };
 
   // Device control definitions
@@ -32,10 +64,11 @@ const Dashboard = () => {
     },
     {
       title: "LED Light Therapy",
-      description: "Adjust LED light intensity and patterns",
+      description: "Adjust LED light color for therapy",
       icon: <Lightbulb className="h-5 w-5" />,
       endpoint: "/ledcolors",
-      historyEndpoint: "/led-history"
+      historyEndpoint: "/led-history",
+      hasColorPicker: true
     },
     {
       title: "Steam Generator",
@@ -74,6 +107,7 @@ const Dashboard = () => {
       title: "Biofeedback",
       description: "Enter patient biofeedback measurements",
       endpoint: "/biofeedback",
+      icon: <Heart className="h-5 w-5" />,
       fields: [
         { name: "heart_rate", label: "Heart Rate (BPM)" },
         { name: "heart_rate_variability", label: "Heart Rate Variability (ms)" },
@@ -86,6 +120,7 @@ const Dashboard = () => {
       title: "Burn Progress",
       description: "Document burn wound healing measurements",
       endpoint: "/burn-progress",
+      icon: <Flame className="h-5 w-5" />,
       fields: [
         { name: "wound_size", label: "Wound Size (cm²)" },
         { name: "epithelialization", label: "Epithelialization (%)" },
@@ -98,6 +133,7 @@ const Dashboard = () => {
       title: "Brain Monitoring",
       description: "Record EEG and brain activity metrics",
       endpoint: "/brain-monitoring",
+      icon: <Brain className="h-5 w-5" />,
       fields: [
         { name: "alpha_waves", label: "Alpha Waves (Hz)" },
         { name: "theta_waves", label: "Theta Waves (Hz)" },
@@ -110,6 +146,7 @@ const Dashboard = () => {
       title: "Heart-Brain Synchronicity",
       description: "Measure heart and brain coherence data",
       endpoint: "/heart-brain-synchronicity",
+      icon: <Activity className="h-5 w-5" />,
       fields: [
         { name: "heart_rate_variability", label: "Heart Rate Variability (ms)" },
         { name: "alpha_waves", label: "Alpha Waves (Hz)" },
@@ -146,6 +183,7 @@ const Dashboard = () => {
                 description={device.description}
                 icon={device.icon}
                 hasSlider={device.hasSlider}
+                hasColorPicker={device.hasColorPicker}
                 endpoint={device.endpoint}
                 historyEndpoint={device.historyEndpoint}
                 onViewHistory={handleViewHistory}
@@ -162,15 +200,49 @@ const Dashboard = () => {
             <h2 className="text-xl font-semibold">Health Data Forms</h2>
           </div>
           
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {dataForms.map((form) => (
+              <Card key={form.title} className="overflow-hidden hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-health-light p-2 rounded-full text-health-primary mr-3">
+                      {form.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{form.title}</h3>
+                      <p className="text-sm text-muted-foreground">{form.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <button 
+                      onClick={() => handleViewDataHistory(form.title, form.endpoint, form.fields)}
+                      className="text-sm text-health-primary font-medium flex items-center hover:underline"
+                    >
+                      View History
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                    <button 
+                      onClick={() => document.getElementById(`form-${form.title}`)?.scrollIntoView({ behavior: 'smooth' })}
+                      className="bg-health-primary text-white px-3 py-1.5 rounded-md text-sm hover:bg-health-secondary transition-colors"
+                    >
+                      Submit New Data
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {dataForms.map((form) => (
-              <DataForm
-                key={form.title}
-                title={form.title}
-                description={form.description}
-                fields={form.fields}
-                endpoint={form.endpoint}
-              />
+              <div id={`form-${form.title}`} key={`form-${form.title}`}>
+                <DataForm
+                  title={form.title}
+                  description={form.description}
+                  fields={form.fields}
+                  endpoint={form.endpoint}
+                />
+              </div>
             ))}
           </div>
         </section>
@@ -181,6 +253,14 @@ const Dashboard = () => {
         onClose={closeModal}
         title={modalData.title}
         endpoint={modalData.endpoint}
+      />
+      
+      <DataHistoryModal
+        isOpen={dataHistoryModal.isOpen}
+        onClose={closeDataHistoryModal}
+        title={dataHistoryModal.title}
+        endpoint={dataHistoryModal.endpoint}
+        fields={dataHistoryModal.fields}
       />
     </div>
   );

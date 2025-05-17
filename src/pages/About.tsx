@@ -33,7 +33,9 @@ Founded in 2020, our team of medical professionals and technology experts has de
         role: "Head of Product Development",
         bio: "Lisa specializes in creating intuitive healthcare interfaces and workflow optimization."
       }
-    ]
+    ],
+    heroImage: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158", 
+    visionImage: "https://images.unsplash.com/photo-1521322800607-8c38375eef04"
   });
 
   // This would be an API call in a real app
@@ -54,7 +56,7 @@ Founded in 2020, our team of medical professionals and technology experts has de
           {/* Hero image section */}
           <div className="relative h-80 rounded-2xl overflow-hidden shadow-lg">
             <img 
-              src="/placeholder.svg" 
+              src={aboutData.heroImage} 
               alt="WOMB Healthcare Technology" 
               className="w-full h-full object-cover"
             />
@@ -83,7 +85,7 @@ Founded in 2020, our team of medical professionals and technology experts has de
             <Card className="overflow-hidden h-full">
               <CardContent className="p-0">
                 <img 
-                  src="/placeholder.svg" 
+                  src={aboutData.visionImage} 
                   alt="Our vision for healthcare" 
                   className="w-full h-64 object-cover"
                 />

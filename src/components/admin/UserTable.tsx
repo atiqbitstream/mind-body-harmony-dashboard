@@ -14,6 +14,8 @@ import {
 import UserDeviceHistory from "./UserDeviceHistory";
 import UserEditForm from "./UserEditForm";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import UserDataHistory from "./UserDataHistory";
 
 // Enhanced mock user data with status field
 const mockUsers = [
@@ -114,32 +116,87 @@ const UserTable = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [viewingDevice, setViewingDevice] = useState<{ name: string, endpoint: string } | null>(null);
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [viewingFormData, setViewingFormData] = useState<{ formType: string, userId: string, userName: string } | null>(null);
 
   // Device controls definitions
   const deviceControls = [
     {
       title: "Sound System",
-      endpoint: "/sound-history"
+      endpoint: "/sound-history",
+      status: Math.random() > 0.5
     },
     {
       title: "LED Light Therapy",
-      endpoint: "/led-history"
+      endpoint: "/led-history",
+      color: ["red", "green", "blue", "purple", "yellow"][Math.floor(Math.random() * 5)]
     },
     {
       title: "Steam Generator",
-      endpoint: "/steam-history"
+      endpoint: "/steam-history",
+      status: Math.random() > 0.5
     },
     {
       title: "Nanoflicker",
-      endpoint: "/nanoflicker-history"
+      endpoint: "/nanoflicker-history",
+      status: Math.random() > 0.5
     },
     {
       title: "Temperature Tank",
-      endpoint: "/temperature-tank-history"
+      endpoint: "/temperature-tank-history",
+      temperature: Math.floor(Math.random() * 30) + 60
     },
     {
       title: "Water Pump",
-      endpoint: "/water-pump-history"
+      endpoint: "/water-pump-history",
+      status: Math.random() > 0.5
+    }
+  ];
+
+  // Data forms definitions
+  const dataForms = [
+    {
+      title: "Biofeedback",
+      endpoint: "/biofeedback",
+      fields: [
+        { name: "heart_rate", label: "Heart Rate (BPM)" },
+        { name: "heart_rate_variability", label: "Heart Rate Variability (ms)" },
+        { name: "electromyography", label: "Electromyography (μV)" },
+        { name: "electrodermal_activity", label: "Electrodermal Activity (μS)" },
+        { name: "respiration_rate", label: "Respiration Rate (BPM)" }
+      ]
+    },
+    {
+      title: "Burn Progress",
+      endpoint: "/burn-progress",
+      fields: [
+        { name: "wound_size", label: "Wound Size (cm²)" },
+        { name: "epithelialization", label: "Epithelialization (%)" },
+        { name: "exudate_amount", label: "Exudate Amount (ml)" },
+        { name: "pain_level", label: "Pain Level (0-10)" },
+        { name: "swelling", label: "Swelling (0-10)" }
+      ]
+    },
+    {
+      title: "Brain Monitoring",
+      endpoint: "/brain-monitoring",
+      fields: [
+        { name: "alpha_waves", label: "Alpha Waves (Hz)" },
+        { name: "theta_waves", label: "Theta Waves (Hz)" },
+        { name: "beta_waves", label: "Beta Waves (Hz)" },
+        { name: "gamma_waves", label: "Gamma Waves (Hz)" },
+        { name: "heart_rate", label: "Heart Rate (BPM)" }
+      ]
+    },
+    {
+      title: "Heart-Brain Synchronicity",
+      endpoint: "/heart-brain-synchronicity",
+      fields: [
+        { name: "heart_rate_variability", label: "Heart Rate Variability (ms)" },
+        { name: "alpha_waves", label: "Alpha Waves (Hz)" },
+        { name: "respiratory_sinus_arrhythmia", label: "RSA (ms)" },
+        { name: "coherence_ratio", label: "Coherence Ratio" },
+        { name: "brainwave_coherence", label: "Brainwave Coherence (%)" }
+      ]
     }
   ];
 
@@ -170,6 +227,8 @@ const UserTable = () => {
     setUsers(users.map(user => 
       user.id === userId ? { ...user, status: newStatus } : user
     ));
+    
+    toast.success(`User status ${newStatus ? 'activated' : 'deactivated'}`);
   };
 
   const handleSaveUserEdit = (updatedUser: any) => {
@@ -177,6 +236,27 @@ const UserTable = () => {
       user.id === updatedUser.id ? { ...user, ...updatedUser } : user
     ));
     setEditingUser(null);
+    toast.success("User details updated successfully");
+  };
+
+  const handleViewUserFormData = (formType: string, userId: string, userName: string) => {
+    setViewingFormData({
+      formType,
+      userId,
+      userName
+    });
+  };
+
+  const handleToggleDeviceStatus = (deviceTitle: string, status: boolean) => {
+    toast.success(`${deviceTitle} set to ${status ? 'ON' : 'OFF'} for ${selectedUser?.fullName}`);
+  };
+
+  const handleChangeDeviceColor = (deviceTitle: string, color: string) => {
+    toast.success(`${deviceTitle} color set to ${color} for ${selectedUser?.fullName}`);
+  };
+
+  const handleSetDeviceTemperature = (deviceTitle: string, temperature: string) => {
+    toast.success(`${deviceTitle} temperature set to ${temperature}°F for ${selectedUser?.fullName}`);
   };
 
   return (
@@ -248,27 +328,117 @@ const UserTable = () => {
           <DialogHeader>
             <DialogTitle>User Details: {selectedUser?.fullName}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {deviceControls.map((device) => (
-                <div key={device.title} className="device-card">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-semibold">{device.title}</h3>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleViewDeviceHistory(device)}
-                    >
-                      View History
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    View user interaction with this device
-                  </p>
-                </div>
-              ))}
-            </div>
+
+          {/* Tabs for Devices and Forms */}
+          <div className="flex border-b mb-4">
+            <button 
+              className="py-2 px-4 border-b-2 border-health-primary text-health-primary font-medium"
+            >
+              Devices
+            </button>
+            <button 
+              className="py-2 px-4 hover:text-health-primary"
+              onClick={() => setSelectedUser({...selectedUser, viewingForms: true})}
+            >
+              Health Forms
+            </button>
           </div>
+
+          {selectedUser && !selectedUser.viewingForms ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {deviceControls.map((device, index) => (
+                  <div key={device.title} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-semibold">{device.title}</h3>
+                    </div>
+                    
+                    {device.title === "LED Light Therapy" ? (
+                      <div className="mb-4">
+                        <div className="text-sm text-foreground/70 mb-2">Current Color: <span className="font-medium">{device.color}</span></div>
+                        <div className="flex gap-2 mb-4">
+                          {["red", "green", "blue", "purple", "yellow", "white"].map(color => (
+                            <button
+                              key={color}
+                              className={`w-6 h-6 rounded-full ${color === 'white' ? 'bg-gray-100 border' : `bg-${color}-500`}`}
+                              style={{ 
+                                backgroundColor: color === 'white' ? 'white' : color,
+                                border: color === 'white' ? '1px solid #ddd' : 'none'
+                              }}
+                              onClick={() => handleChangeDeviceColor(device.title, color)}
+                              aria-label={`Set color to ${color}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ) : device.title === "Temperature Tank" ? (
+                      <div className="mb-4">
+                        <div className="text-sm text-foreground/70 mb-2">Current Temperature: <span className="font-medium">{device.temperature}°F</span></div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            defaultValue={device.temperature}
+                            className="w-20 px-2 py-1 border rounded"
+                            min="60"
+                            max="100"
+                            onChange={(e) => handleSetDeviceTemperature(device.title, e.target.value)}
+                          />
+                          <span className="text-sm">°F</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-foreground/70">Status</span>
+                          <div className="flex items-center">
+                            <span className="text-xs mr-2 text-foreground/70">
+                              {device.status ? "ON" : "OFF"}
+                            </span>
+                            <Switch 
+                              checked={device.status} 
+                              onCheckedChange={(checked) => handleToggleDeviceStatus(device.title, checked)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-end">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleViewDeviceHistory(device)}
+                      >
+                        View History
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {dataForms.map(form => (
+                  <div key={form.title} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-semibold">{form.title}</h3>
+                    </div>
+                    <p className="text-sm text-foreground/70 mb-4">View or manage user's {form.title.toLowerCase()} data</p>
+                    <div className="flex justify-end">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleViewUserFormData(form.title, selectedUser.id, selectedUser.fullName)}
+                      >
+                        View Form Data
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -290,6 +460,18 @@ const UserTable = () => {
           user={editingUser}
           onSave={handleSaveUserEdit}
           onCancel={handleCloseEditModal}
+        />
+      )}
+
+      {/* User Form Data Modal */}
+      {viewingFormData && (
+        <UserDataHistory
+          isOpen={!!viewingFormData}
+          onClose={() => setViewingFormData(null)}
+          title={viewingFormData.formType}
+          userId={viewingFormData.userId}
+          userName={viewingFormData.userName}
+          fields={dataForms.find(form => form.title === viewingFormData.formType)?.fields || []}
         />
       )}
     </div>

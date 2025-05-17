@@ -3,6 +3,10 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../hooks/useAuth";
+import { Card, CardContent } from "@/components/ui/card";
+import { format } from "date-fns";
+import { Play, Video } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface LiveSessionData {
   status: boolean;
@@ -14,11 +18,24 @@ interface LiveSessionData {
   duration: string;
 }
 
+interface PastSession {
+  id: string;
+  title: string;
+  date: string;
+  duration: string;
+  host: string;
+  thumbnail: string;
+  videoUrl: string;
+  viewCount: number;
+}
+
 const LiveSession = () => {
   const [liveSession, setLiveSession] = useState<LiveSessionData | null>(null);
+  const [pastSessions, setPastSessions] = useState<PastSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
+  const [selectedVideo, setSelectedVideo] = useState<PastSession | null>(null);
 
   useEffect(() => {
     // In a real app, this would be an API call to fetch the live session data
@@ -32,7 +49,41 @@ const LiveSession = () => {
       duration: "60" // minutes
     };
     
+    const mockPastSessions = [
+      {
+        id: "1",
+        title: "Advanced Therapeutic Sound Techniques",
+        date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+        duration: "45",
+        host: "Dr. Sarah Johnson",
+        thumbnail: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
+        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Example video
+        viewCount: 153
+      },
+      {
+        id: "2",
+        title: "Integrating Light Therapy with Standard Medical Practices",
+        date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days ago
+        duration: "50",
+        host: "Michael Chen",
+        thumbnail: "https://images.unsplash.com/photo-1483058712412-4245e9b90334",
+        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Example video
+        viewCount: 124
+      },
+      {
+        id: "3",
+        title: "Burn Recovery: New Approaches in Healing",
+        date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), // 21 days ago
+        duration: "55",
+        host: "Dr. Lisa Rodriguez",
+        thumbnail: "https://images.unsplash.com/photo-1521322800607-8c38375eef04",
+        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Example video
+        viewCount: 98
+      }
+    ];
+    
     setLiveSession(mockLiveSessionData);
+    setPastSessions(mockPastSessions);
     setLoading(false);
   }, []);
 
@@ -74,6 +125,14 @@ const LiveSession = () => {
     return () => clearInterval(intervalId);
   }, [liveSession]);
 
+  const handleWatchPastSession = (session: PastSession) => {
+    setSelectedVideo(session);
+  };
+
+  const closeVideoModal = () => {
+    setSelectedVideo(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -110,7 +169,7 @@ const LiveSession = () => {
           )}
         </header>
 
-        <div className="max-w-3xl mx-auto bg-card text-card-foreground rounded-lg shadow overflow-hidden">
+        <div className="max-w-3xl mx-auto bg-card text-card-foreground rounded-lg shadow overflow-hidden mb-12">
           {liveSession.status ? (
             <div className="relative pb-[56.25%] h-0">
               <iframe 
@@ -192,7 +251,84 @@ const LiveSession = () => {
             )}
           </div>
         </div>
+
+        {/* Past Sessions Section */}
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-semibold text-health-secondary mb-6 flex items-center">
+            <Video className="mr-2 h-5 w-5" />
+            Past Sessions
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pastSessions.map(session => (
+              <Card key={session.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                <div className="relative h-40">
+                  <img 
+                    src={session.thumbnail} 
+                    alt={session.title} 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={() => handleWatchPastSession(session)}
+                    >
+                      <Play className="h-4 w-4" />
+                      Watch Now
+                    </Button>
+                  </div>
+                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    {session.duration} min
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-medium text-base mb-1 line-clamp-2" title={session.title}>
+                    {session.title}
+                  </h3>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{session.host}</span>
+                    <span>{format(new Date(session.date), 'MMM d, yyyy')}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {session.viewCount} views
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
+      
+      {/* Video Modal for Past Sessions */}
+      <Dialog open={!!selectedVideo} onOpenChange={closeVideoModal}>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden">
+          {selectedVideo && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedVideo.title}</DialogTitle>
+              </DialogHeader>
+              <div className="relative pb-[56.25%] h-0">
+                <iframe 
+                  src={selectedVideo.videoUrl}
+                  className="absolute top-0 left-0 w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={selectedVideo.title}
+                />
+              </div>
+              <div className="text-sm">
+                <div className="font-medium">{selectedVideo.host}</div>
+                <div className="text-muted-foreground">
+                  {format(new Date(selectedVideo.date), 'MMMM d, yyyy')} • {selectedVideo.duration} min • {selectedVideo.viewCount} views
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

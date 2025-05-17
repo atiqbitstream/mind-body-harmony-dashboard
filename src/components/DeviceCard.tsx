@@ -4,12 +4,20 @@ import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface DeviceCardProps {
   title: string;
   description: string;
   icon: JSX.Element;
   hasSlider?: boolean;
+  hasColorPicker?: boolean;
   endpoint: string;
   historyEndpoint: string;
   onViewHistory: (title: string, endpoint: string) => void;
@@ -19,13 +27,15 @@ const DeviceCard = ({
   title, 
   description, 
   icon, 
-  hasSlider = false, 
+  hasSlider = false,
+  hasColorPicker = false,
   endpoint, 
   historyEndpoint,
   onViewHistory
 }: DeviceCardProps) => {
   const [isOn, setIsOn] = useState(false);
   const [temperature, setTemperature] = useState("72");
+  const [selectedColor, setSelectedColor] = useState("red");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleToggle = async (checked: boolean) => {
@@ -69,6 +79,23 @@ const DeviceCard = ({
     }
   };
 
+  const handleColorChange = async (value: string) => {
+    setIsLoading(true);
+    setSelectedColor(value);
+    
+    try {
+      // In a real app, this would be an API call
+      console.log(`Setting ${title} color to ${value}`);
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+      toast.success(`${title} color set to ${value}`);
+    } catch (error) {
+      console.error(`Failed to set ${title} color:`, error);
+      toast.error(`Failed to set ${title} color`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleViewHistory = () => {
     onViewHistory(title, historyEndpoint);
   };
@@ -83,7 +110,7 @@ const DeviceCard = ({
           <h3 className="font-medium">{title}</h3>
         </div>
         
-        {!hasSlider && (
+        {!hasSlider && !hasColorPicker && (
           <div className="flex items-center">
             <span className="text-xs mr-2 text-foreground/70">
               {isOn ? "ON" : "OFF"}
@@ -119,6 +146,28 @@ const DeviceCard = ({
               Set
             </Button>
           </div>
+        </div>
+      )}
+
+      {hasColorPicker && (
+        <div className="mb-4">
+          <Select
+            value={selectedColor}
+            onValueChange={handleColorChange}
+            disabled={isLoading}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select color" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="red">Red</SelectItem>
+              <SelectItem value="green">Green</SelectItem>
+              <SelectItem value="blue">Blue</SelectItem>
+              <SelectItem value="purple">Purple</SelectItem>
+              <SelectItem value="yellow">Yellow</SelectItem>
+              <SelectItem value="white">White</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
       
