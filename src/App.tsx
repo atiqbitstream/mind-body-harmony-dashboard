@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
 
 // Pages to create later
 import About from "./pages/About";
@@ -67,7 +68,8 @@ const App = () => (
                 path="/live-session" 
                 element={<LiveSession />} 
               />
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Landing />} />
+              <Route path="/dashboard-redirect" element={<Index />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
